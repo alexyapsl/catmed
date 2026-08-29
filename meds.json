@@ -1,30 +1,44 @@
 [
   {
-    "id": "med_a",
-    "name": "Med A",
-    "maxPerDay": 4,
-    "timing": "after meals",
-    "note": ""
-  },
-  {
-    "id": "med_b",
-    "name": "Med B",
+    "id": "adrenaline_eye_drops",
+    "name": "Adrenaline Eye Drops 止血眼藥水",
     "maxPerDay": 3,
-    "timing": "any time",
-    "note": ""
+    "timing": "as needed",
+    "note": "can give more"
   },
   {
-    "id": "med_c",
-    "name": "Med C",
-    "maxPerDay": null,
-    "timing": "unlimited — give when needed",
-    "note": ""
+    "id": "interferon_eye_drops",
+    "name": "Interferon Eye Drops 抗病毒眼藥水",
+    "maxPerDay": 3,
+    "timing": null,
+    "note": "can be multiple drops everytime"
   },
   {
-    "id": "med_d",
-    "name": "Med D",
+    "id": "nevanac_acular",
+    "name": "Nevanac/Acular 消炎止痛眼藥膏",
+    "maxPerDay": 3,
+    "timing": null,
+    "note": "1 drop only each time"
+  },
+  {
+    "id": "ocle_eye_drops",
+    "name": "OCLE Eye Drops 抗生素眼藥",
+    "maxPerDay": 4,
+    "timing": null,
+    "note": "1 drop only each time"
+  },
+  {
+    "id": "marbocyl",
+    "name": "Marbocyl 抗生素",
+    "maxPerDay": 1,
+    "timing": "after meal",
+    "note": "1.5 tab everytime"
+  },
+  {
+    "id": "lysozyme",
+    "name": "Lysozyme 消炎酵素",
     "maxPerDay": 2,
-    "timing": "before bed",
-    "note": ""
+    "timing": "after meal",
+    "note": "1/4 tab everytime"
   }
 ]
