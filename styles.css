@@ -1,0 +1,114 @@
+:root {
+  --bg: #11151c;
+  --card: #1c2230;
+  --text: #e8eaf0;
+  --muted: #9aa3b2;
+  --accent: #4ecdc4;
+  --warn: #ff7b7b;
+  --ok: #7dffb0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+header h1 { font-size: 1.3rem; margin: 0; }
+.who { font-size: 0.9rem; color: var(--muted); }
+.who select {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+#dayNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px;
+}
+#dayNav button {
+  background: var(--card);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#dayLabel { font-weight: 600; }
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.card.complete { outline: 2px solid var(--ok); }
+.card.over { outline: 2px solid var(--warn); }
+.card h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #2c3648;
+  color: var(--accent);
+  font-weight: 600;
+}
+.badge.unlimited { color: var(--muted); }
+.progress {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 4px 0;
+}
+.progress .expected { color: var(--muted); font-weight: 400; }
+.notes { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+.given {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.chip {
+  background: #2c3648;
+  border: none;
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.chip small { color: var(--muted); }
+button.add {
+  background: var(--accent);
+  color: #06201d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+footer { text-align: center; padding: 10px; }
+#statusLine { font-size: 0.75rem; color: var(--muted); margin: 0; }

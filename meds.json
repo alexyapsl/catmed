@@ -1,0 +1,30 @@
+[
+  {
+    "id": "med_a",
+    "name": "Med A",
+    "maxPerDay": 4,
+    "timing": "after meals",
+    "note": ""
+  },
+  {
+    "id": "med_b",
+    "name": "Med B",
+    "maxPerDay": 3,
+    "timing": "any time",
+    "note": ""
+  },
+  {
+    "id": "med_c",
+    "name": "Med C",
+    "maxPerDay": null,
+    "timing": "unlimited — give when needed",
+    "note": ""
+  },
+  {
+    "id": "med_d",
+    "name": "Med D",
+    "maxPerDay": 2,
+    "timing": "before bed",
+    "note": ""
+  }
+]
