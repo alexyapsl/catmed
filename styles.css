@@ -119,13 +119,17 @@ footer { text-align: center; padding: 14px; }
   background: #16202b;
   color: var(--text);
 }
-.editBtns { display: flex; gap: 10px; }
+.editBtns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 button.okBig, button.noBig {
-  flex: 1;
+  flex: 1 1 100%;
   min-height: 52px;
   border: none;
   border-radius: 10px;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
   cursor: pointer;
 }

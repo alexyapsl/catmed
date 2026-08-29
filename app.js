@@ -115,21 +115,47 @@ async function delDose(med, e) {
 function editDose(med, e, chip) {
   const wrap = document.createElement("div");
   wrap.className = "editRow";
+
+  // Tap chip → menu: Edit | Delete | Cancel (all full-width buttons)
+  const btns = document.createElement("div");
+  btns.className = "editBtns";
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "okBig";
+  editBtn.textContent = "✎ Edit";
+  editBtn.onclick = () => openEditInput(med, e, wrap, btns);
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "noBig";
+  deleteBtn.textContent = "🗑 Delete";
+  deleteBtn.onclick = () => delDose(med, e);
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "noBig";
+  cancelBtn.textContent = "✕ Cancel";
+
+  btns.append(editBtn, deleteBtn, cancelBtn);
+  wrap.append(btns);
+  chip.replaceWith(wrap);
+  cancelBtn.onclick = render;
+}
+
+function openEditInput(med, e, wrap, menuBtns) {
+  menuBtns.innerHTML = "";
   const input = document.createElement("input");
   input.type = "datetime-local";
   input.value = new Date(e.ts - new Date().getTimezoneOffset() * 60000)
     .toISOString().slice(0, 16);
-  const btns = document.createElement("div");
-  btns.className = "editBtns";
+
   const save = document.createElement("button");
   save.className = "okBig";
   save.textContent = "✓ Save";
   const cancel = document.createElement("button");
   cancel.className = "noBig";
   cancel.textContent = "✕ Cancel";
-  btns.append(save, cancel);
-  wrap.append(input, btns);
-  chip.replaceWith(wrap);
+
+  menuBtns.append(save, cancel);
+  wrap.append(input, menuBtns);
   save.onclick = async () => {
     if (!input.value) return;
     await update(ref(db, `doses/${selectedDay}/${med.id}/${e.id}`), {
