@@ -1,0 +1,27 @@
+name: Export & prune dose history
+on:
+  schedule:
+    # 00:05 HKT every day (16:05 UTC)
+    - cron: "5 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run export
+        env:
+          FIREBASE_DB_URL: ${{ vars.FIREBASE_DB_URL }}
+          RETENTION_DAYS: "28"
+        run: node scripts/export.mjs
+      - name: Commit snapshot
+        run: |
+          git config user.name "catmed-bot"
+          git config user.email "actions@github.com"
+          git add exports/
+          git commit -m "Dose export $(date +%F)" || echo "nothing to commit"
+          git push
