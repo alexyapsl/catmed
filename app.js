@@ -113,16 +113,22 @@ async function delDose(med, e) {
   await remove(ref(db, `doses/${selectedDay}/${med.id}/${e.id}`));
 }
 function editDose(med, e, chip) {
+  const wrap = document.createElement("div");
+  wrap.className = "editRow";
   const input = document.createElement("input");
   input.type = "datetime-local";
   input.value = new Date(e.ts - new Date().getTimezoneOffset() * 60000)
     .toISOString().slice(0, 16);
+  const btns = document.createElement("div");
+  btns.className = "editBtns";
   const save = document.createElement("button");
-  save.textContent = "✓";
+  save.className = "okBig";
+  save.textContent = "✓ Save";
   const cancel = document.createElement("button");
-  cancel.textContent = "✕";
-  const wrap = document.createElement("span");
-  wrap.append(input, save, cancel);
+  cancel.className = "noBig";
+  cancel.textContent = "✕ Cancel";
+  btns.append(save, cancel);
+  wrap.append(input, btns);
   chip.replaceWith(wrap);
   save.onclick = async () => {
     if (!input.value) return;

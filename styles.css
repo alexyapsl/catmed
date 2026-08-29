@@ -104,3 +104,30 @@ button.add {
 }
 footer { text-align: center; padding: 14px; }
 #statusLine { font-size: 0.8rem; color: var(--muted); margin: 0; }
+.editRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.editRow input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--muted);
+  background: #16202b;
+  color: var(--text);
+}
+.editBtns { display: flex; gap: 10px; }
+button.okBig, button.noBig {
+  flex: 1;
+  min-height: 52px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+button.okBig { background: var(--ok); color: #06301d; }
+button.noBig { background: var(--warn); color: #2d0606; }
