@@ -1,8 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, onValue, push, remove, update
+  getDatabase, ref, onValue, push, set, remove, update
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// ---------- Setup ----------
 if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.databaseURL) {
   document.getElementById("statusLine").textContent =
     "Missing firebase-config.js — copy firebase-config.example.js and fill in your project keys.";
@@ -11,64 +12,102 @@ if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.databaseURL) {
 const app = initializeApp(window.FIREBASE_CONFIG);
 const db = getDatabase(app);
 
+// ---------- HK-time helpers (reset at HK midnight) ----------
 const HK = "Asia/Hong_Kong";
 const dayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: HK });
-function dayKey(d) { return dayFmt.format(d); }
+function dayKey(d) { return dayFmt.format(d); } // YYYY-MM-DD
 function todayKey() { return dayKey(new Date()); }
 function shiftDay(key, n) {
-  const [y, m, d] = key.split("-");
-  return dayKey(new Date(Date.UTC(+y, +m - 1, +d + n)));
+  const [y, m, d] = key.split("-").map(Number);
+  return dayKey(new Date(Date.UTC(y, m - 1, d + n)));
 }
+function fmtTime(ts) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: HK, hour: "2-digit", minute: "2-digit", hour12: false
+  }).format(new Date(ts));
+}
+
+// ---------- State ----------
 let selectedDay = todayKey();
-let dayData = {};
+let meds = [];
+let dayData = {}; // medId -> { pushId: {ts, by} }
+let unsubscribe = null;
+
+const statusLine = document.getElementById("statusLine");
+const whoSelect = document.getElementById("whoSelect");
+whoSelect.value = localStorage.getItem("cm-who") || "Alex";
+whoSelect.addEventListener("change", () =>
+  localStorage.setItem("cm-who", whoSelect.value));
+
+// ---------- Load meds (hardcoded list lives in meds.json in the repo) ----------
+async function loadMeds() {
+  const res = await fetch("meds.json", { cache: "no-store" });
+  meds = await res.json();
+}
+
+// ---------- Firebase subscription for the selected day ----------
+function subscribeDay() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  const r = ref(db, `doses/${selectedDay}`);
+  unsubscribe = onValue(r, (snap) => {
+    dayData = snap.val() || {};
+    render();
+  }, (err) => {
+    statusLine.textContent = "Firebase error: " + err.message;
+  });
+}
+document.getElementById("prevDay").onclick = () => {
+  selectedDay = shiftDay(selectedDay, -1); subscribeDay();
+};
+document.getElementById("nextDay").onclick = () => {
+  selectedDay = shiftDay(selectedDay, 1); subscribeDay();
+};
 
 // ---------- Render ----------
 function render() {
   document.getElementById("dayLabel").textContent = selectedDay;
   const main = document.getElementById("medCards");
   main.innerHTML = "";
-
   for (const med of meds) {
-    const entriesData = dayData[med.id] || {};
-    const entries = Object.entries(entriesData).map(([id, v]) => ({ id, ...v }));
+    const entries = Object.entries(dayData[med.id] || {})
+      .map(([id, v]) => ({ id, ...v }))
+      .sort((a, b) => a.ts - b.ts);
+    const max = med.maxPerDay; // null = unlimited
     const count = entries.length;
-    const over = med.maxPerDay !== null && count > med.maxPerDay;
-    const complete = med.maxPerDay !== null && count === med.maxPerDay;
+    const over = max !== null && count > max;
+    const complete = max !== null && count === max;
 
     const card = document.createElement("div");
     card.className = "card" + (over ? " over" : complete ? " complete" : "");
-
     const h = document.createElement("h2");
     h.textContent = med.name + " ";
     const badge = document.createElement("span");
-    badge.className = "badge" + (med.maxPerDay === null ? " unlimited" : "");
-    badge.textContent = med.maxPerDay === null ? "unlimited" : `${med.maxPerDay}x daily`;
+    badge.className = "badge" + (max === null ? " unlimited" : "");
+    badge.textContent = max === null ? "unlimited" : `${max}x daily`;
     h.appendChild(badge);
     card.appendChild(h);
 
     if (med.timing) {
-      const note = document.createElement("div");
-      note.className = "notes";
-      note.textContent = "⏱ " + med.timing + (med.note ? " · " + med.note : "");
-      card.appendChild(note);
+      const n = document.createElement("div");
+      n.className = "notes";
+      n.textContent = "⏱ " + med.timing + (med.note ? " · " + med.note : "");
+      card.appendChild(n);
     }
 
     const p = document.createElement("div");
     p.className = "progress";
-    p.innerHTML = med.maxPerDay === null
+    p.innerHTML = max === null
       ? `${count} given`
-      : `${count}<span class="expected"> / ${med.maxPerDay}</span>${over ? " ⚠️ over limit" : ""}`;
+      : `${count}<span class="expected"> / ${max}</span>${over ? " ⚠️ over limit" : ""}`;
     card.appendChild(p);
 
     const chips = document.createElement("div");
     chips.className = "given";
-    for (const e of entries.sort((a, b) => a.ts - b.ts)) {
+    const isToday = selectedDay === todayKey();
+    for (const e of entries) {
       const chip = document.createElement("button");
       chip.className = "chip";
-      const timeStr = new Intl.DateTimeFormat("en-GB", {
-        timeZone: HK, hour: "2-digit", minute: "2-digit", hour12: false
-      }).format(new Date(e.ts));
-      chip.innerHTML = `${timeStr} <small>by ${e.by}</small>`;
+      chip.innerHTML = `${fmtTime(e.ts)} <small>${e.by || ""}</small>`;
       chip.title = "Long-press/right-click to delete; click to edit time";
       chip.onclick = () => editDose(med, e, chip);
       chip.oncontextmenu = (ev) => { ev.preventDefault(); delDose(med, e); };
@@ -76,40 +115,29 @@ function render() {
     }
     card.appendChild(chips);
 
-    const isToday = selectedDay === todayKey();
     if (isToday) {
-      const actions = document.createElement("div");
-      actions.className = "actions";
-      const alexBtn = document.createElement("button");
-      alexBtn.className = "add";
-      alexBtn.textContent = "Alex given";
-      alexBtn.onclick = () => addDose(med, entries.length, "Alex");
-      const wifeBtn = document.createElement("button");
-      wifeBtn.className = "add";
-      wifeBtn.textContent = "Wife given";
-      wifeBtn.onclick = () => addDose(med, entries.length, "Wife");
-      actions.append(alexBtn, wifeBtn);
-      card.appendChild(actions);
+      const btn = document.createElement("button");
+      btn.className = "add";
+      btn.textContent = "Mark given now";
+      btn.onclick = () => addDose(med, entries.length);
+      card.appendChild(btn);
     }
     main.appendChild(card);
   }
-
-  document.getElementById("statusLine").textContent =
-    "Live · resets at 00:00 HK · history kept 4 weeks (auto-exported to GitHub)";
+  statusLine.textContent =
+    "Live-synced · resets at 00:00 HK · history kept 4 weeks (auto-exported to GitHub)";
 }
 
 // ---------- Actions ----------
-async function addDose(med, currentCount, by) {
+async function addDose(med, currentCount) {
   if (med.maxPerDay !== null && currentCount >= med.maxPerDay) {
     if (!confirm(`"${med.name}" already has ${currentCount} doses (limit ${med.maxPerDay}). Add another anyway?`)) return;
   }
-  await push(ref(db, `doses/${selectedDay}/${med.id}`), {
-    ts: Date.now(),
-    by: by
-  });
+  const rec = { ts: Date.now(), by: whoSelect.value };
+  await push(ref(db, `doses/${selectedDay}/${med.id}`), rec);
 }
 async function delDose(med, e) {
-  if (!confirm(`Delete this ${med.name} dose?`)) return;
+  if (!confirm(`Delete ${med.name} dose at ${fmtTime(e.ts)}?`)) return;
   await remove(ref(db, `doses/${selectedDay}/${med.id}/${e.id}`));
 }
 function editDose(med, e, chip) {
@@ -133,29 +161,7 @@ function editDose(med, e, chip) {
   cancel.onclick = render;
 }
 
-// ---------- Wire up ----------
-let meds = [];
-document.getElementById("prevDay").onclick = () => { selectedDay = shiftDay(selectedDay, -1); subscribeDay(); };
-document.getElementById("nextDay").onclick = () => { selectedDay = shiftDay(selectedDay, 1); subscribeDay(); };
-
-let unsubscribe = null;
-function subscribeDay() {
-  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-  const r = ref(db, `doses/${selectedDay}`);
-  unsubscribe = onValue(r, (snap) => {
-    dayData = snap.val() || {};
-    render();
-  }, (err) => {
-    document.getElementById("statusLine").textContent = "Firebase error: " + err.message;
-  });
-}
-
-fetch("meds.json", { cache: "no-store" })
-  .then(r => { if (!r.ok) throw new Error("no meds"); return r.json(); })
-  .then(data => {
-    meds = data;
-    subscribeDay();
-  })
-  .catch(err => {
-    document.getElementById("statusLine").textContent = err.message;
-  });
+// ---------- Go ----------
+await loadMeds();
+document.getElementById("statusLine").textContent = "Connecting…";
+subscribeDay();
