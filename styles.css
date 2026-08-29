@@ -110,7 +110,7 @@ footer { text-align: center; padding: 14px; }
   gap: 8px;
   width: 100%;
 }
-.editRow input {
+.editRow input[type="datetime-local"] {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
@@ -118,6 +118,8 @@ footer { text-align: center; padding: 14px; }
   border: 1px solid var(--muted);
   background: #16202b;
   color: var(--text);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 .editBtns {
   display: flex;
