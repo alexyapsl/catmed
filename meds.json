@@ -12,5 +12,12 @@
     "maxPerDay": 3,
     "timing": null,
     "note": null
+  },
+  {
+    "id": "ocle_eye_drops",
+    "name": "OCLE Eye Drops 抗生素眼藥",
+    "maxPerDay": 4,
+    "timing": null,
+    "note": null
   }
 ]
