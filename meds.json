@@ -19,5 +19,12 @@
     "maxPerDay": 4,
     "timing": null,
     "note": null
+  },
+  {
+    "id": "lysozyme_60mg",
+    "name": "Lysozyme 60mg Tab 消炎酵素",
+    "maxPerDay": 2,
+    "timing": null,
+    "note": "1/4 tab/time"
   }
 ]
