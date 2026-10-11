@@ -1,19 +1,5 @@
 [
   {
-    "id": "nevanac_acular",
-    "name": "Nevanac/Acular Eye Drops 消炎止痛眼藥膏",
-    "maxPerDay": 2,
-    "timing": null,
-    "note": null
-  },
-  {
-    "id": "parading_ophthalmic",
-    "name": "Paradin Ophthaimic Solution 抗敏眼藥水",
-    "maxPerDay": 3,
-    "timing": null,
-    "note": null
-  },
-  {
     "id": "ocle_eye_drops",
     "name": "OCLE Eye Drops 抗生素眼藥",
     "maxPerDay": 4,
